@@ -1,0 +1,26 @@
+nuitka --standalone ^
+    --enable-plugin=pyqt5 ^
+    --windows-console-mode=disable ^
+    --windows-icon-from-ico=icon.ico ^
+    --jobs=4 ^
+    --output-dir=dist ^
+    --include-module=csv ^
+    --include-module=sqlite3 ^
+    --include-module=zlib ^
+    --include-module=hashlib ^
+    --include-module=json ^
+    --include-module=PIL ^
+    --include-module=PIL.Image ^
+    --include-module=PIL.ImageDraw ^
+    --include-module=PIL.ImageFont ^
+    --include-module=datetime ^
+    --include-module=os ^
+    --include-module=sys ^
+    --include-module=shutil ^
+    --include-module=PyQt5.QtCore ^
+    --include-module=PyQt5.QtGui ^
+    --include-module=PyQt5.QtWidgets ^
+    --include-module=PyQt5.QtNetwork ^
+    --include-data-files=icon.ico=icon.ico ^
+    --windows-uac-admin ^
+    Database_Manager.py

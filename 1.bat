@@ -1,0 +1,2 @@
+cls
+python Database_Manager.py

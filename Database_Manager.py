@@ -6,34 +6,35 @@ import zlib
 import hashlib
 import json
 from datetime import datetime
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                            QTableView, QPushButton, QLabel, QLineEdit, QMessageBox,
                            QFileDialog, QComboBox, QTabWidget, QTextEdit, QSplitter,
-                           QHeaderView, QAbstractItemView, QMenu, QAction, QInputDialog,
+                           QHeaderView, QAbstractItemView, QMenu, QInputDialog,
                            QDialog, QFormLayout, QDialogButtonBox, QCheckBox, QStatusBar,
                            QToolBar, QSystemTrayIcon, QMenuBar, QStyle, QToolButton,
                            QListWidget, QListWidgetItem, QStackedWidget, QGroupBox,
                            QSpinBox, QDoubleSpinBox, QDateEdit, QDateTimeEdit, QTextBrowser,
                            QProgressDialog, QSplashScreen, QGraphicsView, QGraphicsScene,
                            QGraphicsRectItem, QGraphicsTextItem, QColorDialog, QCompleter)
-from PyQt5.QtGui import (QIcon, QStandardItemModel, QStandardItem, QFont, QColor, 
+from PySide6.QtGui import (QIcon, QStandardItemModel, QStandardItem, QFont, QColor, 
                         QTextCursor, QSyntaxHighlighter, QTextCharFormat, QKeySequence,
                         QTextDocument, QPixmap, QBrush, QPen, QPainter, QLinearGradient,
-                        QPalette, QTextOption, QFontMetrics)
-from PyQt5.QtCore import (Qt, QSize, QSettings, QFileInfo, QRegularExpression, 
-                         QSortFilterProxyModel, QTimer, pyqtSignal, QThread, QObject,
+                        QPalette, QTextOption, QFontMetrics, QAction)
+from PySide6.QtCore import (Qt, QSize, QSettings, QFileInfo, QRegularExpression, 
+                         QSortFilterProxyModel, QTimer, Signal, QThread, QObject,
                          QStringListModel, QRectF, QPointF, QDateTime, QCoreApplication)
+
 
 
 class ProjectInfo:
     """项目信息元数据（集中管理所有项目相关信息）"""
-    VERSION = "3.0.0"
-    BUILD_DATE = "2025-05-26"
+    VERSION = "4.0"
+    BUILD_DATE = "2026-08-20"
     AUTHOR = "杜玛"
     LICENSE = "MIT"
     COPYRIGHT = "© 永久 杜玛"
     URL = "https://github.com/duma520"
-    MAINTAINER_EMAIL = "support@duma520.com"
+    MAINTAINER_EMAIL = "***已脱敏***-邮箱"
     NAME = "SQLite 数据库管理器 Pro"
     DESCRIPTION = "增强版 SQLite 数据库管理器，支持多种高级功能"
     HELP_TEXT = """
@@ -82,8 +83,8 @@ class ProjectInfo:
 
 class DatabaseBackupThread(QThread):
     """数据库备份线程"""
-    progress = pyqtSignal(int, str)
-    finished = pyqtSignal(bool, str)
+    progress = Signal(int, str)
+    finished = Signal(bool, str)
 
     def __init__(self, source_path, dest_path, parent=None):
         super().__init__(parent)
@@ -156,8 +157,8 @@ class DatabaseBackupThread(QThread):
 
 class DatabaseEncryptThread(QThread):
     """数据库加密线程"""
-    progress = pyqtSignal(int, str)
-    finished = pyqtSignal(bool, str)
+    progress = Signal(int, str)
+    finished = Signal(bool, str)
 
     def __init__(self, db_path, password, encrypt=True, parent=None):
         super().__init__(parent)
@@ -229,7 +230,7 @@ class SQLHighlighter(QSyntaxHighlighter):
         # SQL 关键字
         keywordFormat = QTextCharFormat()
         keywordFormat.setForeground(QColor(0, 0, 255))
-        keywordFormat.setFontWeight(QFont.Bold)
+        keywordFormat.setFontWeight(QFont.Weight.Bold)
         
         keywords = [
             "SELECT", "FROM", "WHERE", "INSERT", "INTO", "VALUES", "UPDATE", "SET",
@@ -250,7 +251,7 @@ class SQLHighlighter(QSyntaxHighlighter):
         ]
         
         for word in keywords:
-            pattern = QRegularExpression(f"\\b{word}\\b", QRegularExpression.CaseInsensitiveOption)
+            pattern = QRegularExpression(f"\\b{word}\\b", QRegularExpression.PatternOption.CaseInsensitiveOption)
             self.highlightingRules.append((pattern, keywordFormat))
         
         # 字符串
@@ -316,9 +317,9 @@ class SQLCompleter(QCompleter):
     """SQL自动完成"""
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setCaseSensitivity(Qt.CaseInsensitive)
-        self.setCompletionMode(QCompleter.PopupCompletion)
-        self.setModelSorting(QCompleter.CaseInsensitivelySortedModel)
+        self.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+        self.setModelSorting(QCompleter.ModelSorting.CaseInsensitivelySortedModel)
         
         # 初始化关键词
         keywords = [
@@ -436,9 +437,9 @@ class DatabaseTab(QWidget):
             
             # 表数据视图
             table_view = QTableView()
-            table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
-            table_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            table_view.setContextMenuPolicy(Qt.CustomContextMenu)
+            table_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+            table_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+            table_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
             table_view.customContextMenuRequested.connect(
                 lambda pos, view=table_view, t=table_name: self.parent.show_table_context_menu(pos, view, t, self.db_path))
             
@@ -468,7 +469,7 @@ class DatabaseTab(QWidget):
             table_view.setSortingEnabled(True)
             
             # 调整列宽
-            table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+            table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
             table_view.horizontalHeader().setStretchLastSection(True)
             
             # 按钮区域
@@ -547,8 +548,8 @@ class DatabaseTab(QWidget):
             # 启用排序
             sys_tables_view.setSortingEnabled(True)
             
-            sys_tables_view.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-            sys_tables_view.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+            sys_tables_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+            sys_tables_view.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
             
             layout.addWidget(sys_tables_view)
             
@@ -607,7 +608,7 @@ class DatabaseTab(QWidget):
                 model.appendRow([cid, name, type_, notnull, dflt_value, pk])
             
             columns_table.setModel(model)
-            columns_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            columns_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             
             columns_layout.addWidget(columns_table)
             tab_widget.addTab(columns_widget, "列")
@@ -650,7 +651,7 @@ class DatabaseTab(QWidget):
                     model.appendRow([seq, name, unique, sql_item])
                 
                 indexes_table.setModel(model)
-                indexes_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+                indexes_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
                 
                 indexes_layout.addWidget(indexes_table)
                 tab_widget.addTab(indexes_widget, "索引")
@@ -658,11 +659,11 @@ class DatabaseTab(QWidget):
             layout.addWidget(tab_widget)
             
             # 按钮
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
             button_box.accepted.connect(dialog.accept)
             layout.addWidget(button_box)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"无法获取表结构:\n{str(e)}")
@@ -707,8 +708,8 @@ class DatabaseTab(QWidget):
 
 class DatabaseManager(QMainWindow):
     """主窗口类"""
-    database_opened = pyqtSignal(str)
-    database_closed = pyqtSignal()
+    database_opened = Signal(str)
+    database_closed = Signal()
     
     def __init__(self, db_path=None):
         super().__init__()
@@ -725,6 +726,11 @@ class DatabaseManager(QMainWindow):
         
         # 加载设置
         self.settings = QSettings("SQLiteManagerPro", "DatabaseManager")
+        # 设置实时自动保存（500ms 防抖，保证下次启动沿用上次设置与修改）
+        self._settings_save_timer = QTimer(self)
+        self._settings_save_timer.setSingleShot(True)
+        self._settings_save_timer.setInterval(500)
+        self._settings_save_timer.timeout.connect(self.save_settings)
         self.load_settings()
         
         # 初始化系统托盘
@@ -750,7 +756,7 @@ class DatabaseManager(QMainWindow):
         self.create_toolbar()
         
         # 主内容区域
-        self.content_splitter = QSplitter(Qt.Vertical)
+        self.content_splitter = QSplitter(Qt.Orientation.Vertical)
         main_layout.addWidget(self.content_splitter)
         
         # 数据库选项卡
@@ -788,7 +794,7 @@ class DatabaseManager(QMainWindow):
         sql_toolbar.setIconSize(QSize(16, 16))
         
         self.execute_action = QAction(QIcon.fromTheme("media-playback-start"), "执行 (F5)", self)
-        self.execute_action.setShortcut(QKeySequence("F5"))
+        self.execute_action.setShortcut(QKeySequence.StandardKey.Refresh)  # F5 对应 Refresh
         self.execute_action.triggered.connect(self.execute_sql)
         sql_toolbar.addAction(self.execute_action)
         
@@ -829,9 +835,9 @@ class DatabaseManager(QMainWindow):
         
         # 结果表格
         self.sql_result_table = QTableView()
-        self.sql_result_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.sql_result_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.sql_result_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.sql_result_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.sql_result_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.sql_result_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.sql_result_table.customContextMenuRequested.connect(self.show_sql_result_context_menu)
         
         # 结果文本
@@ -871,7 +877,7 @@ class DatabaseManager(QMainWindow):
         file_menu = menubar.addMenu("文件")
         
         self.open_action = QAction(QIcon.fromTheme("document-open"), "打开数据库...", self)
-        self.open_action.setShortcut(QKeySequence.Open)
+        self.open_action.setShortcut(QKeySequence.StandardKey.Open)
         self.open_action.triggered.connect(self.open_database_dialog)
         file_menu.addAction(self.open_action)
         
@@ -911,7 +917,7 @@ class DatabaseManager(QMainWindow):
         file_menu.addSeparator()
         
         exit_action = QAction(QIcon.fromTheme("application-exit"), "退出", self)
-        exit_action.setShortcut(QKeySequence.Quit)
+        exit_action.setShortcut(QKeySequence.StandardKey.Quit)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         
@@ -919,12 +925,12 @@ class DatabaseManager(QMainWindow):
         edit_menu = menubar.addMenu("编辑")
         
         self.copy_action = QAction(QIcon.fromTheme("edit-copy"), "复制", self)
-        self.copy_action.setShortcut(QKeySequence.Copy)
+        self.copy_action.setShortcut(QKeySequence.StandardKey.Copy)
         self.copy_action.triggered.connect(self.copy_selected_content)
         edit_menu.addAction(self.copy_action)
         
         self.paste_action = QAction(QIcon.fromTheme("edit-paste"), "粘贴", self)
-        self.paste_action.setShortcut(QKeySequence.Paste)
+        self.paste_action.setShortcut(QKeySequence.StandardKey.Paste)
         self.paste_action.triggered.connect(self.paste_content)
         edit_menu.addAction(self.paste_action)
         
@@ -936,7 +942,7 @@ class DatabaseManager(QMainWindow):
         view_menu = menubar.addMenu("视图")
         
         self.refresh_action = QAction(QIcon.fromTheme("view-refresh"), "刷新", self)
-        self.refresh_action.setShortcut(QKeySequence.Refresh)
+        self.refresh_action.setShortcut(QKeySequence.StandardKey.Refresh)
         self.refresh_action.setEnabled(False)
         self.refresh_action.triggered.connect(self.refresh_current_database)
         view_menu.addAction(self.refresh_action)
@@ -1008,7 +1014,7 @@ class DatabaseManager(QMainWindow):
     def create_toolbar(self):
         toolbar = self.addToolBar("工具栏")
         toolbar.setObjectName("mainToolBar")
-        toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         toolbar.setIconSize(QSize(24, 24))
         
         toolbar.addAction(self.open_action)
@@ -1047,7 +1053,7 @@ class DatabaseManager(QMainWindow):
         self.tray_icon.activated.connect(self.tray_icon_activated)
     
     def tray_icon_activated(self, reason):
-        if reason == QSystemTrayIcon.DoubleClick:
+        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
             self.showNormal()
     
     def load_settings(self):
@@ -1078,6 +1084,10 @@ class DatabaseManager(QMainWindow):
         sql_history = self.settings.value("sqlHistory", [])
         self.update_sql_history_menu(sql_history)
     
+    def _autosave_settings(self):
+        """触发设置实时自动保存（500ms 防抖）"""
+        self._settings_save_timer.start()
+
     def save_settings(self):
         self.settings.setValue("windowGeometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
@@ -1125,7 +1135,7 @@ class DatabaseManager(QMainWindow):
             display_text = sql[:50] + "..." if len(sql) > 50 else sql
             action = QAction(f"{len(self.sql_history)-i}. {display_text}", self)
             action.setData(sql)
-            action.triggered.connect(lambda _, s=sql: self.load_sql_from_history(s))
+            action.triggered.connect(lambda checked=False, s=sql: self.load_sql_from_history(s))
             self.history_menu.addAction(action)
         
         self.history_menu.addSeparator()
@@ -1155,6 +1165,8 @@ class DatabaseManager(QMainWindow):
         
         # 更新菜单
         self.update_sql_history_menu(self.sql_history)
+        # 实时自动保存SQL历史（防止程序异常退出丢失）
+        self._autosave_settings()
     
     def load_sql_from_history(self, sql):
         self.sql_editor.setPlainText(sql)
@@ -1386,7 +1398,7 @@ class DatabaseManager(QMainWindow):
             # 创建进度对话框
             progress = QProgressDialog("正在备份数据库...", "取消", 0, 100, self)
             progress.setWindowTitle("数据库备份")
-            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setAutoClose(True)
             
             # 连接信号
@@ -1409,10 +1421,10 @@ class DatabaseManager(QMainWindow):
         reply = QMessageBox.question(
             self, "确认", 
             "恢复操作将覆盖当前数据库，确定要继续吗?", 
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
-        if reply != QMessageBox.Yes:
+        if reply != QMessageBox.StandardButton.Yes:
             return
         
         options = QFileDialog.Options()
@@ -1456,7 +1468,7 @@ class DatabaseManager(QMainWindow):
             # 创建进度对话框
             progress = QProgressDialog("正在优化数据库...", None, 0, 100, self)
             progress.setWindowTitle("数据库优化")
-            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setAutoClose(True)
             
             # 执行优化命令
@@ -1507,11 +1519,11 @@ class DatabaseManager(QMainWindow):
             
             layout.addWidget(text_edit)
             
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
             button_box.accepted.connect(dialog.accept)
             layout.addWidget(button_box)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"完整性检查失败:\n{str(e)}")
@@ -1524,7 +1536,7 @@ class DatabaseManager(QMainWindow):
         
         password, ok = QInputDialog.getText(
             self, "加密数据库", "输入加密密码:", 
-            QLineEdit.Password
+            QLineEdit.EchoMode.Password
         )
         
         if ok and password:
@@ -1534,7 +1546,7 @@ class DatabaseManager(QMainWindow):
             # 创建进度对话框
             progress = QProgressDialog("正在加密数据库...", "取消", 0, 100, self)
             progress.setWindowTitle("数据库加密")
-            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setAutoClose(True)
             
             # 连接信号
@@ -1556,7 +1568,7 @@ class DatabaseManager(QMainWindow):
         
         password, ok = QInputDialog.getText(
             self, "解密数据库", "输入解密密码:", 
-            QLineEdit.Password
+            QLineEdit.EchoMode.Password
         )
         
         if ok and password:
@@ -1566,7 +1578,7 @@ class DatabaseManager(QMainWindow):
             # 创建进度对话框
             progress = QProgressDialog("正在解密数据库...", "取消", 0, 100, self)
             progress.setWindowTitle("数据库解密")
-            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setAutoClose(True)
             
             # 连接信号
@@ -1700,7 +1712,7 @@ class DatabaseManager(QMainWindow):
                 # 绘制柱状
                 bar = QGraphicsRectItem(x, y, bar_width * 0.8, bar_height)
                 bar.setBrush(QBrush(QColor(70, 130, 180)))
-                bar.setPen(QPen(Qt.black, 1))
+                bar.setPen(QPen(Qt.GlobalColor.black, 1))
                 self.visualization_scene.addItem(bar)
                 
                 # 添加标签
@@ -1820,12 +1832,12 @@ class DatabaseManager(QMainWindow):
         list_widget = QListWidget()
         for sql in reversed(self.sql_history):
             item = QListWidgetItem(sql[:100] + "..." if len(sql) > 100 else sql)
-            item.setData(Qt.UserRole, sql)
+            item.setData(Qt.ItemDataRole.UserRole, sql)
             list_widget.addItem(item)
         
         layout.addWidget(list_widget)
         
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(dialog.accept)
         button_box.rejected.connect(dialog.reject)
         layout.addWidget(button_box)
@@ -1833,16 +1845,16 @@ class DatabaseManager(QMainWindow):
         def load_selected_sql():
             selected_items = list_widget.selectedItems()
             if selected_items:
-                sql = selected_items[0].data(Qt.UserRole)
+                sql = selected_items[0].data(Qt.ItemDataRole.UserRole)
                 self.sql_editor.setPlainText(sql)
         
         list_widget.itemDoubleClicked.connect(load_selected_sql)
         list_widget.itemDoubleClicked.connect(dialog.accept)
         
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             selected_items = list_widget.selectedItems()
             if selected_items:
-                sql = selected_items[0].data(Qt.UserRole)
+                sql = selected_items[0].data(Qt.ItemDataRole.UserRole)
                 self.sql_editor.setPlainText(sql)
     
     def update_completer(self):
@@ -1852,7 +1864,7 @@ class DatabaseManager(QMainWindow):
         
         # 获取当前光标前的文本
         cursor = self.sql_editor.textCursor()
-        cursor.select(QTextCursor.WordUnderCursor)
+        cursor.select(QTextCursor.SelectionType.WordUnderCursor)
         word = cursor.selectedText()
         
         if word:
@@ -1907,7 +1919,7 @@ class DatabaseManager(QMainWindow):
         copy_action.triggered.connect(lambda: self.copy_selected_content(view))
         menu.addAction(copy_action)
         
-        menu.exec_(view.viewport().mapToGlobal(pos))
+        menu.exec(view.viewport().mapToGlobal(pos))
     
     def show_sql_result_context_menu(self, pos):
         """显示SQL结果上下文菜单"""
@@ -1925,7 +1937,7 @@ class DatabaseManager(QMainWindow):
         visualize_action.triggered.connect(self.visualize_current_result)
         menu.addAction(visualize_action)
         
-        menu.exec_(self.sql_result_table.viewport().mapToGlobal(pos))
+        menu.exec(self.sql_result_table.viewport().mapToGlobal(pos))
     
     def visualize_current_result(self):
         """可视化当前结果"""
@@ -1944,7 +1956,7 @@ class DatabaseManager(QMainWindow):
             source_model = model
         
         # 获取列名
-        column_names = [source_model.headerData(col, Qt.Horizontal) for col in range(source_model.columnCount())]
+        column_names = [source_model.headerData(col, Qt.Orientation.Horizontal) for col in range(source_model.columnCount())]
         
         # 获取数据
         for row in range(source_model.rowCount()):
@@ -1975,7 +1987,7 @@ class DatabaseManager(QMainWindow):
         
         # 获取表头
         model = view.model()
-        headers = [model.headerData(col, Qt.Horizontal) for col in cols]
+        headers = [model.headerData(col, Qt.Orientation.Horizontal) for col in cols]
         
         # 获取数据
         data = []
@@ -2022,7 +2034,7 @@ class DatabaseManager(QMainWindow):
                     writer = csv.writer(f)
                     
                     # 写入表头
-                    headers = [model.headerData(col, Qt.Horizontal) for col in range(model.columnCount())]
+                    headers = [model.headerData(col, Qt.Orientation.Horizontal) for col in range(model.columnCount())]
                     writer.writerow(headers)
                     
                     # 写入数据
@@ -2084,7 +2096,7 @@ class DatabaseManager(QMainWindow):
         layout.addWidget(self.sql_preview)
         
         # 按钮区域
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(lambda: self.create_table(dialog))
         button_box.rejected.connect(dialog.reject)
         layout.addWidget(button_box)
@@ -2093,9 +2105,12 @@ class DatabaseManager(QMainWindow):
         self.table_name_edit.textChanged.connect(self.update_sql_preview)
         for widget in self.columns_widget.findChildren(QWidget):
             if isinstance(widget, (QLineEdit, QComboBox, QCheckBox)):
-                widget.textChanged.connect(self.update_sql_preview) if hasattr(widget, 'textChanged') else widget.stateChanged.connect(self.update_sql_preview)
+                if hasattr(widget, 'textChanged'):
+                    widget.textChanged.connect(self.update_sql_preview)
+                elif hasattr(widget, 'stateChanged'):
+                    widget.stateChanged.connect(self.update_sql_preview)
         
-        dialog.exec_()
+        dialog.exec()
     
     def add_column_definition(self):
         """添加列定义"""
@@ -2239,9 +2254,9 @@ class DatabaseManager(QMainWindow):
             reply = QMessageBox.question(
                 self, "确认", 
                 "没有定义主键，确定要继续吗?", 
-                QMessageBox.Yes | QMessageBox.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
-            if reply != QMessageBox.Yes:
+            if reply != QMessageBox.StandardButton.Yes:
                 return
         
         # 构建SQL语句
@@ -2293,10 +2308,10 @@ class DatabaseManager(QMainWindow):
                 reply = QMessageBox.question(
                     self, "确认", 
                     f"确定要删除表 {table} 吗? 此操作不可恢复!", 
-                    QMessageBox.Yes | QMessageBox.No
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
                 
-                if reply == QMessageBox.Yes:
+                if reply == QMessageBox.StandardButton.Yes:
                     try:
                         cursor.execute("BEGIN")
                         cursor.execute(f"DROP TABLE {table}")
@@ -2356,7 +2371,7 @@ class DatabaseManager(QMainWindow):
                 model.appendRow([name, unique, sql_item])
             
             index_list.setModel(model)
-            index_list.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            index_list.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             
             layout.addWidget(index_list)
             
@@ -2379,7 +2394,7 @@ class DatabaseManager(QMainWindow):
             
             layout.addLayout(button_layout)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"管理索引失败:\n{str(e)}")
@@ -2418,7 +2433,7 @@ class DatabaseManager(QMainWindow):
             
             # 列选择
             columns_list = QListWidget()
-            columns_list.setSelectionMode(QAbstractItemView.MultiSelection)
+            columns_list.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
             columns_list.addItems(columns)
             form_layout.addRow("选择列:", columns_list)
             
@@ -2448,12 +2463,12 @@ class DatabaseManager(QMainWindow):
             columns_list.itemSelectionChanged.connect(update_sql_preview)
             
             # 按钮区域
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             button_box.accepted.connect(lambda: self.create_index(table_name, db_path, sql_preview.toPlainText(), dialog, parent_dialog))
             button_box.rejected.connect(dialog.reject)
             layout.addWidget(button_box)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"创建索引对话框失败:\n{str(e)}")
@@ -2500,10 +2515,10 @@ class DatabaseManager(QMainWindow):
         reply = QMessageBox.question(
             self, "确认", 
             f"确定要删除索引 {index_name} 吗?", 
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             try:
                 conn = self.open_databases[db_path]
                 cursor = conn.cursor()
@@ -2566,7 +2581,7 @@ class DatabaseManager(QMainWindow):
                 elif "TIME" in col_type.upper() or "DATETIME" in col_type.upper() or "TIMESTAMP" in col_type.upper():
                     edit = QDateTimeEdit()
                     edit.setCalendarPopup(True)
-                    edit.setDateTime(datetime.now())
+                    edit.setDateTime(QDateTime.currentDateTime())
                 else:  # 默认为文本输入
                     edit = QLineEdit()
                 
@@ -2574,8 +2589,10 @@ class DatabaseManager(QMainWindow):
                 
                 if col[5] == 1 and "AUTOINCREMENT" in col[2].upper():
                     edit.setEnabled(False)
-                    if isinstance(edit, (QLineEdit, QSpinBox, QDoubleSpinBox)):
-                        edit.setValue("自动生成")
+                    if isinstance(edit, QLineEdit):
+                        edit.setText("自动生成")
+                    elif isinstance(edit, (QSpinBox, QDoubleSpinBox)):
+                        edit.setValue(0)
                 
                 form_layout.addRow(label, edit)
                 self.record_edits[col_name] = edit
@@ -2601,12 +2618,12 @@ class DatabaseManager(QMainWindow):
             self.update_insert_sql_preview()
             
             # 按钮区域
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             button_box.accepted.connect(lambda: self.insert_record(table_name, db_path, columns, dialog))
             button_box.rejected.connect(dialog.reject)
             layout.addWidget(button_box)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"无法添加记录:\n{str(e)}")
@@ -2620,15 +2637,15 @@ class DatabaseManager(QMainWindow):
         for edit in self.record_edits.values():
             if isinstance(edit, QLineEdit):
                 text = edit.text()
-                if text == "自动生成":
-                    values.append("NULL")
-                elif not text:
+                if text == "自动生成" or not text:
                     values.append("NULL")
                 else:
                     # 安全处理字符串中的引号
                     escaped_text = text.replace("'", "''")
                     values.append(f"'{escaped_text}'")
-            elif isinstance(edit, (QSpinBox, QDoubleSpinBox)):
+            elif isinstance(edit, QSpinBox):
+                values.append(str(edit.value()))
+            elif isinstance(edit, QDoubleSpinBox):
                 values.append(str(edit.value()))
             elif isinstance(edit, QDateEdit):
                 values.append(f"'{edit.date().toString('yyyy-MM-dd')}'")
@@ -2636,12 +2653,11 @@ class DatabaseManager(QMainWindow):
                 values.append(f"'{edit.dateTime().toString('yyyy-MM-dd hh:mm:ss')}'")
         
         # 从对话框标题获取表名
-        title = self.sender().parent().window().windowTitle()
-        if "到 " in title:
-            table_name = title.split("到 ")[-1]
-            sql = f"INSERT INTO {table_name} VALUES ({', '.join(values)})"
-            
-            if hasattr(self, 'sql_preview'):
+        if hasattr(self, 'sql_preview') and self.sender():
+            title = self.sender().parent().window().windowTitle()
+            if "到 " in title:
+                table_name = title.split("到 ")[-1]
+                sql = f"INSERT INTO {table_name} VALUES ({', '.join(values)})"
                 self.sql_preview.setPlainText(sql)
     
     def insert_record(self, table_name, db_path, columns, dialog):
@@ -2753,27 +2769,35 @@ class DatabaseManager(QMainWindow):
                 if "INT" in col_type.upper():
                     edit = QSpinBox()
                     edit.setRange(-2147483648, 2147483647)
-                    edit.setValue(int(model.data(model.index(row, i))) if model.data(model.index(row, i)) else 0)
+                    value = model.data(model.index(row, i))
+                    if value and value != "NULL":
+                        edit.setValue(int(value))
                 elif "REAL" in col_type.upper() or "FLOAT" in col_type.upper() or "DOUBLE" in col_type.upper():
                     edit = QDoubleSpinBox()
                     edit.setRange(-1.7e308, 1.7e308)
                     edit.setDecimals(4)
-                    edit.setValue(float(model.data(model.index(row, i)))) if model.data(model.index(row, i)) else 0.0
+                    value = model.data(model.index(row, i))
+                    if value and value != "NULL":
+                        edit.setValue(float(value))
                 elif "DATE" in col_type.upper():
                     edit = QDateEdit()
                     edit.setCalendarPopup(True)
                     date_str = model.data(model.index(row, i))
-                    if date_str:
+                    if date_str and date_str != "NULL":
+                        from PySide6.QtCore import QDate
                         edit.setDate(QDate.fromString(date_str, 'yyyy-MM-dd'))
                 elif "TIME" in col_type.upper() or "DATETIME" in col_type.upper() or "TIMESTAMP" in col_type.upper():
                     edit = QDateTimeEdit()
                     edit.setCalendarPopup(True)
                     datetime_str = model.data(model.index(row, i))
-                    if datetime_str:
+                    if datetime_str and datetime_str != "NULL":
+                        from PySide6.QtCore import QDateTime
                         edit.setDateTime(QDateTime.fromString(datetime_str, 'yyyy-MM-dd hh:mm:ss'))
                 else:  # 默认为文本输入
                     edit = QLineEdit()
-                    edit.setText(str(model.data(model.index(row, i))) if model.data(model.index(row, i)) else "")
+                    value = model.data(model.index(row, i))
+                    if value and value != "NULL":
+                        edit.setText(str(value))
                 
                 if col[5] == 1:  # 主键
                     edit.setEnabled(False)
@@ -2806,12 +2830,12 @@ class DatabaseManager(QMainWindow):
             self.update_update_sql_preview(table_name, primary_keys, pk_values)
             
             # 按钮区域
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             button_box.accepted.connect(lambda: self.update_record(table_name, db_path, primary_keys, pk_values, dialog))
             button_box.rejected.connect(dialog.reject)
             layout.addWidget(button_box)
             
-            dialog.exec_()
+            dialog.exec()
             
         except Exception as e:
             QMessageBox.critical(self, "错误", f"无法编辑记录:\n{str(e)}")
@@ -2833,7 +2857,9 @@ class DatabaseManager(QMainWindow):
                     # 安全处理字符串中的引号
                     escaped_value = value.replace("'", "''")
                     set_clause.append(f"{col_name} = '{escaped_value}'")
-                elif isinstance(edit, (QSpinBox, QDoubleSpinBox)):
+                elif isinstance(edit, QSpinBox):
+                    set_clause.append(f"{col_name} = {edit.value()}")
+                elif isinstance(edit, QDoubleSpinBox):
                     set_clause.append(f"{col_name} = {edit.value()}")
                 elif isinstance(edit, QDateEdit):
                     set_clause.append(f"{col_name} = '{edit.date().toString('yyyy-MM-dd')}'")
@@ -2942,10 +2968,10 @@ class DatabaseManager(QMainWindow):
             reply = QMessageBox.question(
                 self, "确认", 
                 f"确定要删除选中的 {len(selected_rows)} 条记录吗?", 
-                QMessageBox.Yes | QMessageBox.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
             
-            if reply != QMessageBox.Yes:
+            if reply != QMessageBox.StandardButton.Yes:
                 return
             
             # 构建WHERE子句
@@ -3325,19 +3351,19 @@ class DatabaseManager(QMainWindow):
         if checked:
             # 深色主题
             palette = QPalette()
-            palette.setColor(QPalette.Window, QColor(53, 53, 53))
-            palette.setColor(QPalette.WindowText, Qt.white)
-            palette.setColor(QPalette.Base, QColor(25, 25, 25))
-            palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-            palette.setColor(QPalette.ToolTipBase, Qt.white)
-            palette.setColor(QPalette.ToolTipText, Qt.white)
-            palette.setColor(QPalette.Text, Qt.white)
-            palette.setColor(QPalette.Button, QColor(53, 53, 53))
-            palette.setColor(QPalette.ButtonText, Qt.white)
-            palette.setColor(QPalette.BrightText, Qt.red)
-            palette.setColor(QPalette.Link, QColor(42, 130, 218))
-            palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-            palette.setColor(QPalette.HighlightedText, Qt.black)
+            palette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))
+            palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
+            palette.setColor(QPalette.ColorRole.Base, QColor(25, 25, 25))
+            palette.setColor(QPalette.ColorRole.AlternateBase, QColor(53, 53, 53))
+            palette.setColor(QPalette.ColorRole.ToolTipBase, Qt.GlobalColor.white)
+            palette.setColor(QPalette.ColorRole.ToolTipText, Qt.GlobalColor.white)
+            palette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
+            palette.setColor(QPalette.ColorRole.Button, QColor(53, 53, 53))
+            palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
+            palette.setColor(QPalette.ColorRole.BrightText, Qt.GlobalColor.red)
+            palette.setColor(QPalette.ColorRole.Link, QColor(42, 130, 218))
+            palette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
+            palette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.black)
             QApplication.setPalette(palette)
         else:
             # 浅色主题
@@ -3377,11 +3403,11 @@ class DatabaseManager(QMainWindow):
         
         layout.addWidget(text_browser)
         
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
         button_box.accepted.connect(dialog.accept)
         layout.addWidget(button_box)
         
-        dialog.exec_()
+        dialog.exec()
     
     def show_about_dialog(self):
         """显示关于对话框"""
@@ -3406,6 +3432,7 @@ class DatabaseManager(QMainWindow):
     
     def closeEvent(self, event):
         """关闭事件"""
+        self._settings_save_timer.stop()
         self.save_settings()
         
         # 关闭所有数据库连接
@@ -3420,11 +3447,11 @@ if __name__ == "__main__":
     
     # 显示启动画面
     splash_pix = QPixmap("icon.png")  # 替换为你的启动图片
-    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash = QSplashScreen(splash_pix, Qt.WindowType.WindowStaysOnTopHint)
     splash.show()
     
     # 模拟加载过程
-    splash.showMessage("正在初始化...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+    splash.showMessage("正在初始化...", Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter, Qt.GlobalColor.white)
     QCoreApplication.processEvents()
     
     # 设置应用程序字体
@@ -3441,9 +3468,9 @@ if __name__ == "__main__":
     # 检查图标文件是否存在，不存在则创建
     icon_path = "icon.ico"
     if not os.path.exists(icon_path):
-        from PIL import Image, ImageDraw, ImageFont
-        
         try:
+            from PIL import Image, ImageDraw, ImageFont
+            
             # 创建一个简单的图标
             img = Image.new('RGBA', (256, 256), (70, 130, 180, 255))
             draw = ImageDraw.Draw(img)
@@ -3466,4 +3493,4 @@ if __name__ == "__main__":
     
     window.show()
     
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

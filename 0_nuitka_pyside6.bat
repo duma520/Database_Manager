@@ -1,0 +1,26 @@
+nuitka --standalone ^
+    --enable-plugin=pyside6  ^
+    --windows-console-mode=disable ^
+    --windows-icon-from-ico=icon.ico ^
+    --jobs=4 ^
+    --output-dir=dist ^
+    --include-module=csv ^
+    --include-module=sqlite3 ^
+    --include-module=hashlib ^
+    --include-module=json ^
+    --include-module=datetime ^
+    --include-module=os ^
+    --include-module=shutil ^
+    --include-module=PySide6 ^
+    --include-module=PySide6.QtCore ^
+    --include-module=PySide6.QtGui ^
+    --include-module=PySide6.QtWidgets ^
+    --include-module=PySide6.QtNetwork ^
+    --include-module=PIL ^
+    --include-module=PIL.Image ^
+    --include-module=PIL.ImageDraw ^
+    --include-module=PIL.ImageFont ^
+    --include-data-files=icon.ico=icon.ico ^
+    --windows-uac-admin ^
+    --follow-imports ^
+    Database_Manager.py

@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf8'?>
+<nuitka-compilation-report nuitka_version="4.0.3" nuitka_commercial_version="not installed" mode="standalone" completion="error exit message (1)" exit_message="upx: No UPX binary found, please use '--upx-binary' option to specify it.">
+  <performance>
+    <memory_usage name="after_launch" value="31735808" />
+  </performance>
+  <data_composer blob_size="None" />
+  <command_line>
+    <option value="--standalone" />
+    <option value="--enable-plugin=pyside6" />
+    <option value="--windows-console-mode=disable" />
+    <option value="--windows-icon-from-ico=icon.ico" />
+    <option value="--jobs=4" />
+    <option value="--output-dir=dist" />
+    <option value="--include-module=csv" />
+    <option value="--include-module=sqlite3" />
+    <option value="--include-module=zlib" />
+    <option value="--include-module=hashlib" />
+    <option value="--include-module=json" />
+    <option value="--include-module=datetime" />
+    <option value="--include-module=os" />
+    <option value="--include-module=sys" />
+    <option value="--include-module=shutil" />
+    <option value="--include-module=PySide6" />
+    <option value="--include-module=PySide6.QtCore" />
+    <option value="--include-module=PySide6.QtGui" />
+    <option value="--include-module=PySide6.QtWidgets" />
+    <option value="--include-module=PySide6.QtNetwork" />
+    <option value="--include-module=PIL" />
+    <option value="--include-module=PIL.Image" />
+    <option value="--include-module=PIL.ImageDraw" />
+    <option value="--include-module=PIL.ImageFont" />
+    <option value="--include-data-files=icon.ico=icon.ico" />
+    <option value="--windows-uac-admin" />
+    <option value="--follow-imports" />
+    <option value="--enable-plugin=upx" />
+    <option value="Database_Manager.py" />
+  </command_line>
+  <plugins>
+    <plugin name="anti-bloat" user_enabled="no" />
+    <plugin name="data-files" user_enabled="no" />
+    <plugin name="delvewheel" user_enabled="no" />
+    <plugin name="dll-files" user_enabled="no" />
+    <plugin name="eventlet" user_enabled="no" />
+    <plugin name="gevent" user_enabled="no" />
+    <plugin name="gi" user_enabled="no" />
+    <plugin name="glfw" user_enabled="no" />
+    <plugin name="implicit-imports" user_enabled="no" />
+    <plugin name="kivy" user_enabled="no" />
+    <plugin name="matplotlib" user_enabled="no" />
+    <plugin name="multiprocessing" user_enabled="no" />
+    <plugin name="options-nanny" user_enabled="no" />
+    <plugin name="pbr-compat" user_enabled="no" />
+    <plugin name="pkg-resources" user_enabled="no" />
+    <plugin name="playwright" user_enabled="no" />
+    <plugin name="pyside6" user_enabled="yes" />
+    <plugin name="pywebview" user_enabled="no" />
+    <plugin name="spacy" user_enabled="no" />
+    <plugin name="transformers" user_enabled="no" />
+    <plugin name="upx" user_enabled="yes" />
+  </plugins>
+  <distributions />
+  <python python_exe="${sys.prefix}\python.exe" python_flavor="CPython Official" python_version="3.10.11" os_name="Windows" os_release="10" arch_name="x86_64" filesystem_encoding="utf-8">
+    <search_path>
+      <path value="${cwd}" />
+      <path value="${sys.prefix}\DLLs" />
+      <path value="${sys.prefix}\lib" />
+      <path value="${sys.prefix}" />
+      <path value="${sys.prefix}\lib\site-packages" />
+      <path value="${sys.prefix}\lib\site-packages\win32" />
+      <path value="${sys.prefix}\lib\site-packages\win32\lib" />
+      <path value="${sys.prefix}\lib\site-packages\Pythonwin" />
+    </search_path>
+  </python>
+  <output />
+</nuitka-compilation-report>
